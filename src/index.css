@@ -1,0 +1,29 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-feature-settings: "ss01", "ss02", "cv01", "cv02", "cv03";
+  -webkit-font-smoothing: antialiased;
+  color-scheme: dark;
+}
+
+/* Force dark theme and ensure content visibility */
+html, body {
+  min-height: 100vh;
+  overflow: hidden;
+  overscroll-behavior: none;
+  background-color: black;
+  color: white;
+}
+
+#root {
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background-color: black;
+}
+
+/* Rest of your existing styles... (keep everything else the same) */
