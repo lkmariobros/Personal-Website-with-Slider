@@ -1,12 +1,37 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SECTIONS } from '../lib/constants';
 import { useAnimationStore } from '../lib/store';
-import AccordionInfoPanel from './AccordionInfoPanel';
 import { contentVariants, accordionItemVariants } from '../lib/animations';
-import { logger } from '../lib/logger';
+import type { NavItem } from '../lib/types';
 
-export default function AccordionContent() {
+// Content component for individual sections
+const AccordionContent = memo(function AccordionContent({
+  section,
+  isActive,
+  layoutId
+}: {
+  section: NavItem;
+  isActive: boolean;
+  layoutId: string;
+}) {
+  return (
+    <motion.div
+      className="absolute inset-0 flex items-center justify-center"
+      layoutId={layoutId}
+      animate={isActive ? "enter" : "exit"}
+      variants={contentVariants}
+    >
+      <div className="p-8">
+        <h2 className="text-2xl font-bold mb-4">{section.name}</h2>
+        <p className="text-white/80">{section.content}</p>
+      </div>
+    </motion.div>
+  );
+});
+
+// Main accordion component
+const Accordion = () => {
   const { 
     activeIndex, 
     setActiveIndex,
@@ -16,67 +41,62 @@ export default function AccordionContent() {
 
   const handleSectionClick = useCallback((index: number) => {
     if (isAnimating) return;
-
-    logger.debug('AccordionContent', `Section clicked: ${index}`);
+    
     setIsAnimating(true);
     setActiveIndex(index === activeIndex ? -1 : index);
     
     setTimeout(() => {
       setIsAnimating(false);
-    }, 300);
+    }, 400);
   }, [activeIndex, setActiveIndex, isAnimating, setIsAnimating]);
 
-  const renderSection = useMemo(() => (section: typeof SECTIONS[0], index: number) => {
+  const renderSection = useMemo(() => (section: NavItem, index: number) => {
     const isActive = index === activeIndex;
 
     return (
-      <motion.div
-        key={section.name}
-        className={`flex flex-col cursor-pointer group transition-colors border-b border-white/10
-          ${isActive ? 'bg-white/10' : 'hover:bg-white/5'}`}
-        onClick={() => handleSectionClick(index)}
-        variants={accordionItemVariants}
-        animate={isActive ? "expanded" : "collapsed"}
-        layout
+      <div
+        key={index}
+        className="relative"
+        style={{
+          width: isActive ? 'calc(100% - 240px)' : '80px'
+        }}
       >
-        {/* Title Bar */}
-        <motion.div 
-          className="h-14 flex items-center px-6"
-          layoutId={`title-${index}`}
+        <motion.div
+          className="h-full"
+          variants={accordionItemVariants}
+          initial="collapsed"
+          animate={isActive ? "expanded" : "collapsed"}
+          onClick={() => handleSectionClick(index)}
         >
-          <span className="opacity-50 group-hover:opacity-100 transition-opacity text-sm mr-4">
-            0{index + 1}
-          </span>
-          <span className="font-medium tracking-wide">{section.name}</span>
+          <AnimatePresence mode="wait">
+            {isActive && (
+              <motion.div
+                className="absolute inset-0"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.4 }}
+                onAnimationComplete={() => setIsAnimating(false)}
+              >
+                <div className="px-6 pb-8">
+                  <AccordionContent section={section} isActive={isActive} layoutId={`content-${index}`} />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </motion.div>
-
-        {/* Content */}
-        <AnimatePresence mode="wait">
-          {isActive && (
-            <motion.div 
-              className="relative overflow-hidden"
-              variants={contentVariants}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              onAnimationStart={() => setIsAnimating(true)}
-              onAnimationComplete={() => setIsAnimating(false)}
-            >
-              <div className="px-6 pb-8">
-                <AccordionInfoPanel section={section} />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
+      </div>
     );
   }, [activeIndex, handleSectionClick, setIsAnimating]);
 
   return (
-    <div className="h-full overflow-y-auto scrollbar-hide">
-      <div className="flex flex-col">
+    <div className="fixed inset-y-0 right-0 flex items-center">
+      <div className="flex h-[85vh]">
         {SECTIONS.map(renderSection)}
       </div>
     </div>
   );
-}
+};
+
+export { AccordionContent };
+export default Accordion;
