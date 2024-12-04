@@ -1,19 +1,17 @@
 import { memo } from 'react';
 import { motion } from 'framer-motion';
+import type { NavItem } from '../lib/types';
 
 interface SectionLabelProps {
-  name: string;
+  section: NavItem;
   index: number;
   isActive: boolean;
-  isPrevious: boolean;
-  direction: number;
 }
 
 const SectionLabel = memo(function SectionLabel({ 
-  name, 
+  section, 
   index, 
-  isActive, 
-  isPrevious 
+  isActive
 }: SectionLabelProps) {
   return (
     <motion.div 
@@ -32,7 +30,7 @@ const SectionLabel = memo(function SectionLabel({
           className="transform -rotate-90"
           initial={false}
           animate={{ 
-            opacity: isPrevious ? 0.3 : 1,
+            opacity: 1,
             transition: {
               duration: 0.4,
               ease: [0.32, 0.72, 0, 1]
@@ -40,25 +38,15 @@ const SectionLabel = memo(function SectionLabel({
           }}
         >
           <span className="font-medium text-sm">
-            {name}
+            {section.name}
           </span>
         </motion.div>
       </div>
       <div className="flex justify-center mt-auto">
         <motion.span 
-          className={`text-[11px] font-medium transform -rotate-90 ${
-            isPrevious ? 'text-white/20' : 'text-white/40'
-          }`}
-          initial={false}
-          animate={{ 
-            opacity: isPrevious ? 0.2 : 0.4,
-            transition: {
-              duration: 0.4,
-              ease: [0.32, 0.72, 0, 1]
-            }
-          }}
+          className="text-[11px] font-medium transform -rotate-90 text-white/40"
         >
-          {String(index + 1).padStart(2, '0')}
+          {String(4 - index).padStart(2, '0')}
         </motion.span>
       </div>
     </motion.div>

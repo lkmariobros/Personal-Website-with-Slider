@@ -33,7 +33,7 @@ export default function AccordionContainer() {
             >
               {/* Header */}
               <div className="h-16 flex items-center px-6 gap-4">
-                <span className="text-sm text-white/50">0{index + 1}</span>
+                <span className="text-sm text-white/50">{(SECTIONS.length - index).toString().padStart(2, '0')}</span>
                 <span className="font-medium">{section.name}</span>
               </div>
 
